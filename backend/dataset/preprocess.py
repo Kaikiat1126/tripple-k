@@ -13,11 +13,11 @@ def clean_csv(file_path):
         # replace the \n with space 
         for key in row.keys():
             row[key] = row[key].replace('\n', ' ')
-            #randomly assign the country
-            row["Customer Location"] = random.choice(countries)
-            # uppercase for the device used column first letter
-            row["Device Used"] = row["Device Used"].capitalize()
-            row["Payment Method"] = row["Payment Method"].capitalize()
+        #randomly assign the country
+        row["Customer Location"] = random.choice(countries)
+        # uppercase for the device used column first letter
+        row["Device Used"] = row["Device Used"].capitalize()
+        row["Payment Method"] = row["Payment Method"].capitalize()
 
         #if the customer age is less than 18, no need to include it
         if int(row['Customer Age']) < 18:
