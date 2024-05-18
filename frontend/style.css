@@ -99,3 +99,9 @@ body {
 .one-chart-area {
   display: grid;
 }
+
+.fifth-three-chart-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1.25rem;
+}
