@@ -95,3 +95,7 @@ body {
   grid-template-columns: 2fr 1fr;
   column-gap: 1.25rem;
 }
+
+.one-chart-area {
+  display: grid;
+}

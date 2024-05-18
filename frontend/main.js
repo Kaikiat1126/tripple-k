@@ -253,9 +253,59 @@ async function createHypo5Graph() {
   })
 }
 
+async function createHypo6Graph() {
+  const url = `${import.meta.env.VITE_APP_ENDPOINT}hypothesis_6`
+  fetch(url).then(response => response.json()).then(data => {
+    const country_labels = []
+    const fraud_count = []
+    const non_fraud_count = []
+    const total_count = []
+    data.forEach(item => {
+      country_labels.push(item['country'])
+      fraud_count.push(item['fraud_count'])
+      non_fraud_count.push(item['total_transaction'] - item['fraud_count'])
+      total_count.push(item['total_transaction'])
+    })
+    const config = {
+      type: 'bar',
+      data: {
+        labels: country_labels,
+        datasets: [{
+          label: 'Fraud Count',
+          data: fraud_count,
+          backgroundColor: 'rgb(5, 155, 255)',
+        }, {
+          label: 'Non-Fraud Count',
+          data: non_fraud_count,
+          backgroundColor: 'rgba(255, 99, 132,.8)',
+        }, {
+          label: 'Total Count',
+          data: total_count,
+          borderColor: 'rgb(75, 192, 192)',
+          fill: false,
+        }, {
+          type: 'line',
+          label: 'Total Count',
+          data: total_count,
+          borderColor: 'rgb(75, 192, 192)',
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+      }
+    }
+    new Chart(
+      document.getElementById('hypo6-chart'),
+      config
+    )
+  })
+}
+
 fetchBasicData()
 createHypo1Graph()
 createHypo5Graph()
+createHypo6Graph()
 createHypo7Graph()
 createHypo8PolarGraph()
 createHypo9Graph()
