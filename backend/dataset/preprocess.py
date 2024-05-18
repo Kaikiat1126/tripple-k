@@ -1,9 +1,6 @@
 import csv
 import random
-
-countries = [
-    "Malaysia", "China", "Korea", "Japan", "Africa", "America", "Australia", "Singapore", "Vietnam", "Cambodia", "Indonesia", "US", "UK"
-]
+from ..app.country import countries
 
 def clean_csv(file_path):
     csv_file = open(file_path, 'r')
@@ -14,7 +11,7 @@ def clean_csv(file_path):
         for key in row.keys():
             row[key] = row[key].replace('\n', ' ')
         #randomly assign the country
-        row["Customer Location"] = random.choice(countries)
+        row["Customer Location"] = random.choice(list(countries.keys()))
         # uppercase for the device used column first letter
         row["Device Used"] = row["Device Used"].capitalize()
         row["Payment Method"] = row["Payment Method"].capitalize()

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import pandas as pd
+from .country import countries
 
 app = FastAPI()
 
@@ -8,6 +9,7 @@ dataset = pd.read_csv(dataset_filepath)
 
 hypo1 = None
 hypo5 = None
+hypo6 = None
 hypo7 = None
 hypo8 = None
 
@@ -30,6 +32,14 @@ async def hypothesis_5():
     if hypo5 is None:
         hypo5 = analyse_payment_method(dataset)
     return hypo5
+
+
+@app.get("/hypothesis_6")
+async def hypothesis_6():
+    global hypo6
+    if hypo6 is None:
+        hypo6 = analyse_location(dataset)
+    return hypo6
 
 
 @app.get("/hypothesis_7")
@@ -92,6 +102,37 @@ def analyse_payment_method(dataset):
 
     return result
 
+
+def analyse_location(dataset):
+    cache_dataset = dataset.copy()
+    result = []
+    country_list = cache_dataset['Customer Location'].unique()
+    for i in range(len(country_list)):
+        country = country_list[i]
+        temp = {
+          "country": country_list[i], 
+          "country_continent": countries[country]['continent'], 
+          "country_iso_alpha": countries[country]['iso_alpha'], 
+          "country_iso_num": countries[country]['iso_num'], 
+          "fraud_count": 0, "total_transaction": 0, "fraud_rate": 0
+        }
+        result.append(temp)
+
+    cache_dataset['Is Fraudulent'] = cache_dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    for i in range(len(cache_dataset)):
+        country = cache_dataset.iloc[i]['Customer Location']
+        if country in country_list:
+            result[country_list.tolist().index(country)]['total_transaction'] += 1
+            if cache_dataset.iloc[i]['Is Fraudulent']:
+                result[country_list.tolist().index(country)]['fraud_count'] += 1
+            
+    for i in range(len(result)):
+        result[i]['fraud_rate'] = result[i]['fraud_count'] / result[i]['total_transaction']
+            
+    global hypo6
+    hypo6 = result
+
+    return result
 
 def analyse_device_used(dataset):
     dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)

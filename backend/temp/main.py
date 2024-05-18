@@ -165,7 +165,7 @@ def main():
     data_filepath = 'backend\dataset\Fraudulent_E-Commerce_Transaction_Data.csv'
     data = load_data(data_filepath)
 
-    hypothesis_1(data)
+    hypothesis_6(data)
     
 if __name__ == "__main__":
     main()
