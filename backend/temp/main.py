@@ -1,9 +1,7 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import math
 
 def load_data(filepath):
-    # Load data from CSV
     df = pd.read_csv(filepath)
     
     return df
@@ -11,11 +9,29 @@ def load_data(filepath):
 def hypothesis_1(df):
     df['Transaction Date'] = pd.to_datetime(df['Transaction Date'])
 
+    # Extract hour, month, and year
     df['Transaction Hour'] = df['Transaction Date'].dt.hour
+    df['Transaction Month'] = df['Transaction Date'].dt.month
+    df['Transaction Year'] = df['Transaction Date'].dt.year
 
+    # Ensure 'Is Fraudulent' is boolean
     df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
 
-    fraud_counts = df.groupby('Transaction Hour')['Is Fraudulent'].sum()
+    # Group by hour, month, and year and calculate fraud counts
+    fraud_counts_hour = df.groupby('Transaction Hour')['Is Fraudulent'].sum().reset_index()
+    fraud_counts_month = df.groupby('Transaction Month')['Is Fraudulent'].sum().reset_index()
+    fraud_counts_year = df.groupby('Transaction Year')['Is Fraudulent'].sum().reset_index()
+    
+    
+    # Prepare results in JSON format
+    result_json = {
+        "Fraudulent Transactions by Hour": fraud_counts_hour.to_dict(orient='records'),
+        "Fraudulent Transactions by Month": fraud_counts_month.to_dict(orient='records'),
+        "Fraudulent Transactions by Year": fraud_counts_year.to_dict(orient='records')
+    }
+
+    print(result_json)
+    return result_json
 
     
 #Newer customer accounts are more likely to commit fraud. (Account Age Day and Fraud Count)
@@ -103,14 +119,53 @@ def hypothesis_6(df):
     print(result_json)
     return result_json
 
+def hypothesis_7(df):
+    df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    
+    fraud_counts = df.groupby('Device Used')['Is Fraudulent'].sum().reset_index()
+    total_counts = df['Device Used'].value_counts().reset_index()
+    total_counts.columns = ['Device Used', 'Total Transactions']
+    
+    fraud_rates = pd.merge(fraud_counts, total_counts, on='Device Used')
+    
+    fraud_rates['Fraud Rate'] = fraud_rates['Is Fraudulent'] / fraud_rates['Total Transactions']
+    
+    result_json = fraud_rates.to_json(orient='records')
+    print(result_json)
+    return result_json
+
+def hypothesis_8(df, starting_age=18, interval=5):
+    df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    
+    # Group by age group and calculate fraud counts
+    def get_age_group(age):
+        age_group_start = starting_age + math.floor((age - starting_age) / interval) * interval
+        age_group_end = age_group_start + interval - 1
+        return f"{age_group_start} - {age_group_end}"
+    
+    df['Age Group'] = df['Customer Age'].apply(get_age_group)
+    fraud_counts = df.groupby('Age Group')['Is Fraudulent'].sum().reset_index()
+    
+    most_scam_age_group = fraud_counts.loc[fraud_counts['Is Fraudulent'].idxmax()]
+    
+    result = {
+        "Age Group": most_scam_age_group['Age Group'],
+        "Fraudulent Transaction Count": int(most_scam_age_group['Is Fraudulent'])
+    }
+
+    result_json = pd.Series(result).to_json()
+
+    print(result_json)
+    return result_json
+
 def save_processed_data(data, filepath):
     data.to_csv(filepath, index=False) 
 
 def main():
-    data_filepath = 'Fraudulent_E-Commerce_Transaction_Data_2.csv'
+    data_filepath = '/Users/kyronling/Documents/tripple-k/backend/dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
     data = load_data(data_filepath)
 
-    hypothesis_6(data)
+    hypothesis_1(data)
     
 if __name__ == "__main__":
     main()
