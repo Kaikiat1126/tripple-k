@@ -25,6 +25,7 @@ hypo5 = None
 hypo6 = None
 hypo7 = None
 hypo8 = None
+hypo9 = None
 basic_analysis_result = None
 
 @app.get("/")
@@ -71,6 +72,13 @@ async def hypothesis_8():
         hypo8 = analyse_most_scam_age_group(dataset)
     return hypo8
 
+
+@app.get("/hypothesis_9")
+async def hypothesis_9():
+    global hypo9
+    if hypo9 is None:
+        hypo9 = analyse_by_product_category(dataset)
+    return hypo9
 
 @app.get("/basic_analysis")
 async def basic_analysis():
@@ -220,3 +228,24 @@ def analyse_most_scam_age_group(dataset):
 
     return result
 
+
+def analyse_by_product_category(dataset):
+    products_list = dataset['Product Category'].unique()
+    cache_dataset = dataset.copy()
+    result = []
+    for i in range(len(products_list)):
+        product = products_list[i]
+        temp = {"product_category": product, "fraud_count": 0, "total_transaction": 0}
+        result.append(temp)
+
+    for i in range(len(cache_dataset)):
+        product = cache_dataset.iloc[i]['Product Category']
+        if product in products_list:
+            result[products_list.tolist().index(product)]['total_transaction'] += 1
+            if cache_dataset.iloc[i]['Is Fraudulent']:
+                result[products_list.tolist().index(product)]['fraud_count'] += 1
+
+    global hypo9
+    hypo9 = result
+
+    return result
