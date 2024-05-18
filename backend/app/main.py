@@ -21,6 +21,9 @@ dataset_filepath = 'dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
 dataset = pd.read_csv(dataset_filepath)
 
 hypo1 = None
+hypo2 = None
+hypo3 = None
+hypo4 = None
 hypo5 = None
 hypo6 = None
 hypo7 = None
@@ -40,6 +43,26 @@ async def hypothesis_1():
         hypo1 = analyse_fraudulent_transaction(dataset)
     return hypo1
 
+@app.get("/hypothesis_2")
+async def hypothesis_2():
+    global hypo2
+    if hypo2 is None:
+        hypo2 = analyse_account_day(dataset)
+    return hypo2
+
+@app.get("/hypothesis_3")
+async def hypothesis_3():
+    global hypo3
+    if hypo3 is None:
+        hypo3 = analyse_transaction_amount(dataset)
+    return hypo3
+
+@app.get("/hypothesis_4")
+async def hypothesis_4():
+    global hypo4
+    if hypo4 is None:
+        hypo4 = analyse_product_quantity(dataset)
+    return hypo4
 
 @app.get("/hypothesis_5")
 async def hypothesis_5():
@@ -133,6 +156,60 @@ def analyse_fraudulent_transaction(dataset):
 
     return result
 
+def analyse_account_day(dataset):
+    dataset['Account Age Days'] = pd.to_numeric(dataset['Account Age Days'], errors='coerce')
+
+    dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: 1 if x == 1 else 0)  # Convert to numeric for easier processing
+    # dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+
+    dataset['Account Age Category'] = pd.cut(dataset['Account Age Days'], bins=[-float('inf'), 90, float('inf')], labels=['New', 'Old'])
+
+    fraud_counts = dataset.groupby(['Account Age Category', 'Is Fraudulent']).size().reset_index(name='Count')
+    # fraud_counts = dataset.groupby('Account Age Category')['Is Fraudulent'].sum().reset_index()
+
+    result_json = fraud_counts.to_json(orient='records')
+
+    print(result_json)
+
+    return result_json
+
+def analyse_transaction_amount(dataset):
+    dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else 0)
+    
+    q3 = dataset['Transaction Amount'].quantile(0.75)
+    
+    high_value_transactions = dataset[dataset['Transaction Amount'] > q3]
+    
+    fraud_count = high_value_transactions['Is Fraudulent'].sum()
+    non_fraud_count = high_value_transactions.shape[0] - fraud_count
+    
+    result = [
+        {"High Value Threshold": q3},
+        {"Is Fraudulent": False, "Transaction Count": non_fraud_count},
+        {"Is Fraudulent": True, "Transaction Count": fraud_count}
+    ]
+    
+    result_json = pd.Series(result).to_json(orient='records')
+    print(result_json)
+    return result_json
+
+def analyse_product_quantity(dataset):
+    dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    
+    high_quantity_threshold = dataset['Quantity'].quantile(0.75)
+    
+    high_quantity_transactions = dataset[dataset['Quantity'] > high_quantity_threshold]
+    
+    fraud_counts = high_quantity_transactions.groupby('Product Category')['Is Fraudulent'].sum().reset_index()
+    total_counts = high_quantity_transactions['Product Category'].value_counts().reset_index()
+    total_counts.columns = ['Product Category', 'Total Transactions']
+    
+    fraud_rates = pd.merge(fraud_counts, total_counts, on='Product Category')
+    fraud_rates['Non-Fraudulent Transactions'] = fraud_rates['Total Transactions'] - fraud_rates['Is Fraudulent']
+    
+    result_json = fraud_rates.to_json(orient='records')
+    print(result_json)
+    return result_json
 
 def analyse_payment_method(dataset):
     dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)

@@ -39,14 +39,18 @@ def hypothesis_1(df):
 def hypothesis_2(df):
     df['Account Age Days'] = pd.to_numeric(df['Account Age Days'], errors='coerce')
 
-    df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: 1 if x == 1 else 0)  # Convert to numeric for easier processing
+    # df['Is Fraudulent'] = df['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
 
     df['Account Age Category'] = pd.cut(df['Account Age Days'], bins=[-float('inf'), 90, float('inf')], labels=['New', 'Old'])
 
-    fraud_counts = df.groupby('Account Age Category')['Is Fraudulent'].sum().reset_index()
+    fraud_counts = df.groupby(['Account Age Category', 'Is Fraudulent']).size().reset_index(name='Count')
+    # fraud_counts = df.groupby('Account Age Category')['Is Fraudulent'].sum().reset_index()
 
     result_json = fraud_counts.to_json(orient='records')
+
     print(result_json)
+
     return result_json
 
 def hypothesis_3(df):
@@ -60,7 +64,7 @@ def hypothesis_3(df):
     non_fraud_count = high_value_transactions.shape[0] - fraud_count
     
     result = [
-        {"High Value Trnasaction(Q3)": q3},
+        {"High Value Threshold": q3},
         {"Is Fraudulent": False, "Transaction Count": non_fraud_count},
         {"Is Fraudulent": True, "Transaction Count": fraud_count}
     ]
@@ -76,15 +80,14 @@ def hypothesis_4(df):
     
     high_quantity_transactions = df[df['Quantity'] > high_quantity_threshold]
     
-    fraud_count = high_quantity_transactions['Is Fraudulent'].sum()
-    non_fraud_count = high_quantity_transactions.shape[0] - fraud_count
+    fraud_counts = high_quantity_transactions.groupby('Product Category')['Is Fraudulent'].sum().reset_index()
+    total_counts = high_quantity_transactions['Product Category'].value_counts().reset_index()
+    total_counts.columns = ['Product Category', 'Total Transactions']
     
-    result = [
-        {"Is Fraudulent": False, "Transaction Count": non_fraud_count},
-        {"Is Fraudulent": True, "Transaction Count": fraud_count}
-    ]
+    fraud_rates = pd.merge(fraud_counts, total_counts, on='Product Category')
+    fraud_rates['Non-Fraudulent Transactions'] = fraud_rates['Total Transactions'] - fraud_rates['Is Fraudulent']
     
-    result_json = pd.Series(result).to_json(orient='records')
+    result_json = fraud_rates.to_json(orient='records')
     print(result_json)
     return result_json
 
@@ -165,7 +168,7 @@ def main():
     data_filepath = 'backend\dataset\Fraudulent_E-Commerce_Transaction_Data.csv'
     data = load_data(data_filepath)
 
-    hypothesis_3(data)
+    hypothesis_4(data)
     
 if __name__ == "__main__":
     main()
