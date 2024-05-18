@@ -420,57 +420,6 @@ async function createHypo3Graph() {
     });
 }
 
-async function createHypo4Graph() {
-  const url = `${import.meta.env.VITE_APP_ENDPOINT}hypothesis_4`;
-  
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      const labels = [];
-      const nonFraudulentCounts = [];
-      const fraudulentCounts = [];
-
-      data = JSON.parse(data);
-
-      data.forEach(item => {
-        labels.push(item['Product Category']);
-        nonFraudulentCounts.push(item['Non-Fraudulent Transactions']);
-        fraudulentCounts.push(item['Is Fraudulent']);
-      });
-
-      const config = {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Non-Fraudulent Transactions',
-              data: nonFraudulentCounts,
-              backgroundColor: 'rgba(75, 192, 192, 0.8)',
-              borderColor: 'rgba(75, 192, 192, 1)',
-              borderWidth: 1
-            },
-            {
-              label: 'Fraudulent Transactions',
-              data: fraudulentCounts,
-              backgroundColor: 'rgba(255, 99, 132, 0.8)',
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      };
-
-      new Chart(document.getElementById('hypo4-bar-chart'), config);
-    });
-  }
   
 fetchBasicData()
 createHypo1Graph()
@@ -482,4 +431,3 @@ createHypo9Graph()
 createHypo9Graph()
 createHypo2Graph()
 createHypo3Graph()
-createHypo4Graph()
