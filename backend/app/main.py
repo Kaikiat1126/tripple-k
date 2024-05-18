@@ -88,7 +88,8 @@ async def basic_analysis():
             "total_transaction": len(dataset), 
             "total_fraudulent": count_total_fraudulent(dataset), 
             "total_fraudulent_amount": count_total_fraudulent_amount(dataset),
-            "fraudulent_rate": round(count_total_fraudulent(dataset) / len(dataset) * 100, 3)
+            "fraudulent_rate": round(count_total_fraudulent(dataset) / len(dataset) * 100, 3),
+            "highest_fraud_amount": dataset[dataset['Is Fraudulent'] == 1]['Transaction Amount'].max(),
         }
     return basic_analysis_result
 
@@ -234,7 +235,7 @@ def analyse_by_product_category(dataset):
     cache_dataset = dataset.copy()
     result = []
     for i in range(len(products_list)):
-        product = products_list[i]
+        product = products_list[i].capitalize()
         temp = {"product_category": product, "fraud_count": 0, "total_transaction": 0}
         result.append(temp)
 
