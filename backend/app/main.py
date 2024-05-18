@@ -1,8 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from .country import countries
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 dataset_filepath = 'dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
 dataset = pd.read_csv(dataset_filepath)
@@ -12,6 +25,7 @@ hypo5 = None
 hypo6 = None
 hypo7 = None
 hypo8 = None
+basic_analysis_result = None
 
 @app.get("/")
 async def root():
@@ -56,6 +70,35 @@ async def hypothesis_8():
     if hypo8 is None:
         hypo8 = analyse_most_scam_age_group(dataset)
     return hypo8
+
+
+@app.get("/basic_analysis")
+async def basic_analysis():
+    global basic_analysis_result
+    if basic_analysis_result is None:
+        basic_analysis_result = {
+            "total_transaction": len(dataset), 
+            "total_fraudulent": count_total_fraudulent(dataset), 
+            "total_fraudulent_amount": count_total_fraudulent_amount(dataset),
+            "fraudulent_rate": round(count_total_fraudulent(dataset) / len(dataset) * 100, 3)
+        }
+    return basic_analysis_result
+
+
+def count_total_fraudulent(dataset):
+    count: int = 0
+    for i in range(len(dataset)):
+        if dataset.iloc[i]['Is Fraudulent'] == 1:
+            count += 1
+    return count
+
+
+def count_total_fraudulent_amount(dataset):
+    total_fraudulent_amount: float = 0
+    for i in range(len(dataset)):
+        if dataset.iloc[i]['Is Fraudulent'] == 1:
+            total_fraudulent_amount += dataset.iloc[i]['Transaction Amount']
+    return round(total_fraudulent_amount, 2)
 
 
 def analyse_fraudulent_transaction(dataset):

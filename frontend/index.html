@@ -4,10 +4,61 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Triple K Hackfest</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div style="padding: 2.5rem;">
+        <div class="dashboard-container">
+          <h1 class="dashbaord-title">Triple K Dashboard</h1>
+          <div class="dashboard">
+            <div class="basic-info-row">
+              <div class="basic-information card">
+                <div class="card-title">Total Transaction</div>
+                <div id="total-transaction" class="card-content" style="color: #165dff">22580</div>
+              </div>
+              <div class="basic-information card">
+                <div class="card-title">Total Fraudulent Case</div>
+                <div id="fraudulent-count" class="card-content" style="color: #f53f3f;">1174</div>
+              </div>
+              <div class="basic-information card">
+                <div class="card-title">Total Fraudulent Amount</div>
+                <div class="card-content" style="color: #f53f3f;">
+                  <span class="amount-symbol">$</span>
+                  <span id="fraudulent-amount">650219.75</span>
+                </div>
+              </div>
+              <div class="basic-information card">
+                <div class="card-title">Fradulent Rate</div>
+                <div id="fraudulent-rate" class="card-content" style="color: #ff9a2e;">5.199%</div>
+              </div>
+            </div>
+            <div class="first-two-chart-area">
+              <div class="card">
+                <div class="card-title">Fraudulent transactions made in each hour</div>
+                <canvas id="hypo1-chart"></canvas>
+              </div>
+              <div class="card">
+                <div class="card-title">Each Age Group with Fraudulent Count</div>
+                <canvas id="hypo8-chart"></canvas>
+              </div>
+            </div>
+            <div class="second-three-chart-area">
+              <div class="card">
+                <div class="card-title">Fraudulent transactions with certain devices</div>
+                <canvas id="hypo7-chart"></canvas>
+              </div>
+              <div class="card">
+                <div class="card-title">Transactions made with certain devices with fraudulent</div>
+                <canvas id="hypo7-bar-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
