@@ -6,12 +6,21 @@ app = FastAPI()
 dataset_filepath = 'dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
 dataset = pd.read_csv(dataset_filepath)
 
+hypo5 = None
 hypo7 = None
 hypo8 = None
 
 @app.get("/")
 async def root():
     return {"message": "Hello Triple K"}
+
+@app.get("/hypothesis_5")
+async def hypothesis_5():
+    global hypo5
+    if hypo5 is None:
+        hypo5 = analyse_payment_method(dataset)
+    return hypo5
+
 
 @app.get("/hypothesis_7")
 async def hypothesis_7():
@@ -27,6 +36,27 @@ async def hypothesis_8():
     if hypo8 is None:
         hypo8 = analyse_most_scam_age_group(dataset)
     return hypo8
+
+
+def analyse_payment_method(dataset):
+    dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+    result = []
+    fraud_counts = dataset.groupby('Payment Method')['Is Fraudulent'].sum().reset_index()
+    total_counts = dataset['Payment Method'].value_counts().reset_index()
+    total_counts.columns = ['Payment Method', 'Total Transactions']
+
+    for i in range(len(fraud_counts)):
+        temp_payment = fraud_counts.iloc[i]['Payment Method']
+        temp_count: int = fraud_counts.iloc[i]['Is Fraudulent']
+        temp_total: int = total_counts[total_counts['Payment Method'] == temp_payment]['Total Transactions'].values[0]
+        temp = {"payment_method": temp_payment, "fraud_rate": temp_count / temp_total, "fraud_count": int(str(temp_count)), "total_transaction": int(str(temp_total))}
+        result.append(temp)
+    
+    global hypo5
+    hypo5 = result
+
+    return result
+
 
 def analyse_device_used(dataset):
     dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
