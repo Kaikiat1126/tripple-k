@@ -3,3 +3,4 @@ uvicorn
 python-dotenv
 async-exit-stack
 async-generator
+seaborn

@@ -162,7 +162,7 @@ def save_processed_data(data, filepath):
     data.to_csv(filepath, index=False) 
 
 def main():
-    data_filepath = '/Users/kyronling/Documents/tripple-k/backend/dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
+    data_filepath = 'backend\dataset\Fraudulent_E-Commerce_Transaction_Data.csv'
     data = load_data(data_filepath)
 
     hypothesis_1(data)
