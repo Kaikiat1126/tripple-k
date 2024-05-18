@@ -6,6 +6,7 @@ app = FastAPI()
 dataset_filepath = 'dataset/Fraudulent_E-Commerce_Transaction_Data.csv'
 dataset = pd.read_csv(dataset_filepath)
 
+hypo1 = None
 hypo5 = None
 hypo7 = None
 hypo8 = None
@@ -13,6 +14,15 @@ hypo8 = None
 @app.get("/")
 async def root():
     return {"message": "Hello Triple K"}
+
+
+@app.get("/hypothesis_1")
+async def hypothesis_1():
+    global hypo1
+    if hypo1 is None:
+        hypo1 = analyse_fraudulent_transaction(dataset)
+    return hypo1
+
 
 @app.get("/hypothesis_5")
 async def hypothesis_5():
@@ -36,6 +46,31 @@ async def hypothesis_8():
     if hypo8 is None:
         hypo8 = analyse_most_scam_age_group(dataset)
     return hypo8
+
+
+def analyse_fraudulent_transaction(dataset):
+    dataset['Transaction Date'] = pd.to_datetime(dataset['Transaction Date'])
+
+    dataset['Transaction Hour'] = dataset['Transaction Date'].dt.hour
+    dataset['Transaction Month'] = dataset['Transaction Date'].dt.month
+    dataset['Transaction Year'] = dataset['Transaction Date'].dt.year
+
+    dataset['Is Fraudulent'] = dataset['Is Fraudulent'].apply(lambda x: True if x == 1 else False)
+
+    fraud_counts_hour = dataset.groupby('Transaction Hour')['Is Fraudulent'].sum().reset_index()
+    fraud_counts_month = dataset.groupby('Transaction Month')['Is Fraudulent'].sum().reset_index()
+    fraud_counts_year = dataset.groupby('Transaction Year')['Is Fraudulent'].sum().reset_index()
+    
+    result = {
+        "Fraudulent Transactions by Hour": fraud_counts_hour.to_dict(orient='records'),
+        "Fraudulent Transactions by Month": fraud_counts_month.to_dict(orient='records'),
+        "Fraudulent Transactions by Year": fraud_counts_year.to_dict(orient='records')
+    }
+
+    global hypo1
+    hypo1 = result
+
+    return result
 
 
 def analyse_payment_method(dataset):
