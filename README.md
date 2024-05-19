@@ -6,6 +6,13 @@ This project is a web-based dashboard for analyzing transaction data to identify
 - [Objectives](#objectives)
 - [Installation](#installation)
 - [Implementation](#implementation)
+  - [Dataset](#dataset)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+- [Usage](#usage)
+- [Endpoints](#endpoints)
+- [Contributing](#contributing)
+- [License](#license)
 
 
 ## Inspiration
