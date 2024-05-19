@@ -1,7 +1,7 @@
 # Analyzing Fraudulent E-commerce Transaction by Triple K
 This project is a web-based dashboard for analyzing transaction data to identify fraudulent activities. The dashboard uses Chart.js to visualize data and display insights from different hypotheses.
 
-![Alt text](./TripleK Dashboard.png)
+![Dashboard Screenshot](https://github.com/Kaikiat1126/tripple-k/blob/master/TripleK%20Dashboard.png)
 
 ## Table of Contents
 - [Inspiration](#inspiration)
